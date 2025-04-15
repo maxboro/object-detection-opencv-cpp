@@ -13,7 +13,12 @@ int main() {
     cv::destroyAllWindows();
 
     cv::Mat img_transformed;
-    img.convertTo(img_transformed, -1, 1, 170); // increase brightness
+
+    // increase brightness
+    img.convertTo(img_transformed, -1, 1, 170);
+
+    // cut out part of image
+    img_transformed = img_transformed(cv::Range(150, 300), cv::Range::all());
     cv::imshow("Transformed image", img_transformed);
     // std::cout << img_transformed << std::endl;
 
