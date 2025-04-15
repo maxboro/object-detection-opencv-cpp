@@ -1,0 +1,23 @@
+#include <opencv2/opencv.hpp>
+#include <iostream>
+
+int main() {
+    cv::Mat img = cv::imread("example.jpg");
+    if (img.empty()) {
+        std::cerr << "Failed to read image\n";
+        return -1;
+    }
+    // std::cout << img << std::endl;
+    cv::imshow("Original image", img);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+
+    cv::Mat img_transformed;
+    img.convertTo(img_transformed, -1, 1, 170); // increase brightness
+    cv::imshow("Transformed image", img_transformed);
+    // std::cout << img_transformed << std::endl;
+
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+    return 0;
+}
