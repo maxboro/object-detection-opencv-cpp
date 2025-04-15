@@ -1,4 +1,5 @@
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
 #include <iostream>
 
 int main() {
@@ -19,7 +20,13 @@ int main() {
 
     // cut out part of image
     img_transformed = img_transformed(cv::Range(150, 300), cv::Range::all());
+
+    // blur
+    blur(img_transformed, img_transformed, cv::Size(9, 9), cv::Point(-1,-1));
+
+    // show final transformed image
     cv::imshow("Transformed image", img_transformed);
+
     // std::cout << img_transformed << std::endl;
 
     cv::waitKey(0);
