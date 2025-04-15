@@ -18,3 +18,6 @@ make           # Builds the project
 ```bash
 make clean     # Cleans up build files
 ```
+
+# Example
+![screenshot](./docs/screenshot.png)
