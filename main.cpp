@@ -2,10 +2,14 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
+#define VIDEO_SAVE_RESIZE_COEF 0.5
+#define MIN_AREA_PIX 100
+#define MAX_AREA_PIX 3000
+
 bool person_alike(cv::Rect bbox){
     bool shaped_as_person = bbox.height > bbox.width;
     float area = bbox.height * bbox.width;
-    bool is_small = area < 3000;
+    bool is_small = area > MIN_AREA_PIX && area < MAX_AREA_PIX;
     if (shaped_as_person && is_small){
         return true;
     } else {
@@ -45,14 +49,11 @@ void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_
 
     // Loop over contours to get bounding boxes
     for (const auto& contour : contours) {
-        double area = cv::contourArea(contour);
-        if (area > 100) {  // filter small blobs
-            cv::Rect bbox = cv::boundingRect(contour);
-            if (person_alike(bbox)){
-                // draw ROI
-                cv::rectangle(frame_proc, bbox, cv::Scalar(125, 125, 125), 4); 
-                cv::circle(frame_final,	center_of_bbox(bbox), 1, cv::Scalar(0, 0, 255), 3);
-            }
+        cv::Rect bbox = cv::boundingRect(contour);
+        if (person_alike(bbox)){
+            // draw ROI
+            cv::rectangle(frame_proc, bbox, cv::Scalar(125, 125, 125), 4); 
+            cv::circle(frame_final,	center_of_bbox(bbox), 1, cv::Scalar(0, 0, 255), 5);
         }
     }
 
@@ -67,6 +68,28 @@ int main() {
     cv::VideoCapture cap(videoPath);
     if (!cap.isOpened()) {
         std::cerr << "Error: Cannot open the video file." << std::endl;
+        return -1;
+    }
+
+    // for saving video
+    int frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
+    int frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
+    double fps = cap.get(cv::CAP_PROP_FPS);
+    cv::VideoWriter writer(
+        "./output/output.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        fps, 
+        cv::Size(frame_width, frame_height)
+    );
+    cv::VideoWriter writer_proc(
+        "./output/output_proc.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        fps, 
+        cv::Size(frame_width, frame_height)
+    );
+
+    if (!writer.isOpened()) {
+        std::cerr << "Error: Cannot open the video writer.\n" << std::endl;
         return -1;
     }
 
@@ -89,6 +112,13 @@ int main() {
         cv::imshow("Video with detection", frame_final);
         cv::imshow("Video processed", frame_proc);
 
+        cv::resize(frame_final, frame_final, cv::Size(frame_width, frame_height));
+        writer.write(frame_final);
+
+        cv::resize(frame_proc, frame_proc, cv::Size(frame_width, frame_height));
+        cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
+        writer_proc.write(frame_proc);
+
         // Wait for 30ms and break if 'q' is pressed
         if (cv::waitKey(30) == 'q')
             break;
@@ -96,6 +126,7 @@ int main() {
 
     // Release resources
     cap.release();
+    writer.release();
     cv::destroyAllWindows();
     return 0;
 }

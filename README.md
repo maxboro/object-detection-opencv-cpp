@@ -22,11 +22,13 @@ make clean     # Cleans up build files
 ```
 
 # Example
-Original video:
-<video width="960" height="540" controls>
-  <source src="./data/actions2.mpg" type="video/mpg">
-  Your browser does not support the video tag.
-</video>
+Video with detections:
+![Demo](./docs/output_gif.gif)
+
+Processed video (based on such frames we calculate objects' bounds):
+![Demo](./docs/output_proc_gif.gif)
+
+Screenshot of runtime windows:
 ![algo output example](./docs/screenshot_video.png)
 
 # Credits
