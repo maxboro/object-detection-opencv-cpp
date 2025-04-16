@@ -2,34 +2,131 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
-int main() {
-    cv::Mat img = cv::imread("example.jpg");
-    if (img.empty()) {
-        std::cerr << "Failed to read image\n";
-        return -1;
+#define VIDEO_SAVE_RESIZE_COEF 0.5
+#define MIN_AREA_PIX 100
+#define MAX_AREA_PIX 3000
+
+bool person_alike(cv::Rect bbox){
+    bool shaped_as_person = bbox.height > bbox.width;
+    float area = bbox.height * bbox.width;
+    bool is_small = area > MIN_AREA_PIX && area < MAX_AREA_PIX;
+    if (shaped_as_person && is_small){
+        return true;
+    } else {
+        return false;
     }
-    // std::cout << img << std::endl;
-    cv::imshow("Original image", img);
-    cv::waitKey(0);
-    cv::destroyAllWindows();
+}
 
-    cv::Mat img_transformed;
+cv::Point center_of_bbox(cv::Rect bbox){
+    int x, y;
+    x = bbox.x + (bbox.width / 2);
+    y = bbox.y + (bbox.height / 2);
+    return cv::Point(x, y);
+}
 
-    // increase brightness
-    img.convertTo(img_transformed, -1, 1, 170);
+void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_ptr){
+    cv::Mat frame_proc, frame_final;
 
-    // cut out part of image
-    img_transformed = img_transformed(cv::Range(150, 300), cv::Range::all());
+    frame_final = frame.clone();
+
+    // to back and white
+    cv::cvtColor(frame, frame_proc, cv::COLOR_BGR2GRAY);
 
     // blur
-    blur(img_transformed, img_transformed, cv::Size(9, 9), cv::Point(-1,-1));
+    blur(frame_proc, frame_proc, cv::Size(12, 12), cv::Point(-1,-1));
 
-    // show final transformed image
-    cv::imshow("Transformed image", img_transformed);
+    // Threshold to ensure binary image
+    cv::threshold(frame_proc, frame_proc, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    cv::bitwise_not(frame_proc, frame_proc);
 
-    // std::cout << img_transformed << std::endl;
+    // Morphological filtering
+    cv::morphologyEx(frame_proc, frame_proc, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1,-1), 2);
 
-    cv::waitKey(0);
+    // Find contours
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(frame_proc, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+
+    // Loop over contours to get bounding boxes
+    for (const auto& contour : contours) {
+        cv::Rect bbox = cv::boundingRect(contour);
+        if (person_alike(bbox)){
+            // draw ROI
+            cv::rectangle(frame_proc, bbox, cv::Scalar(125, 125, 125), 4); 
+            cv::circle(frame_final,	center_of_bbox(bbox), 1, cv::Scalar(0, 0, 255), 5);
+        }
+    }
+
+    *frame_proc_ptr = frame_proc;
+    *frame_final_ptr = frame_final;
+}
+
+int main() {
+    std::string videoPath = "./data/actions2.mpg";
+
+    // Open the video file
+    cv::VideoCapture cap(videoPath);
+    if (!cap.isOpened()) {
+        std::cerr << "Error: Cannot open the video file." << std::endl;
+        return -1;
+    }
+
+    // for saving video
+    int frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
+    int frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
+    double fps = cap.get(cv::CAP_PROP_FPS);
+    cv::VideoWriter writer(
+        "./output/output.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        fps, 
+        cv::Size(frame_width, frame_height)
+    );
+    cv::VideoWriter writer_proc(
+        "./output/output_proc.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        fps, 
+        cv::Size(frame_width, frame_height)
+    );
+
+    if (!writer.isOpened()) {
+        std::cerr << "Error: Cannot open the video writer.\n" << std::endl;
+        return -1;
+    }
+
+    // Window to show the video
+    cv::namedWindow("Video with detection", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Video processed", cv::WINDOW_AUTOSIZE);
+
+    cv::Mat frame, frame_proc, frame_final;
+    while (true) {
+        // Read next frame
+        cap >> frame;
+
+        // Check if frame is empty (end of video)
+        if (frame.empty())
+            break;
+
+        process_frame(frame, &frame_proc, &frame_final);
+
+        // Display the frame
+        cv::imshow("Video with detection", frame_final);
+        cv::imshow("Video processed", frame_proc);
+
+        cv::resize(frame_final, frame_final, cv::Size(frame_width, frame_height));
+        writer.write(frame_final);
+
+        cv::resize(frame_proc, frame_proc, cv::Size(frame_width, frame_height));
+        cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
+        writer_proc.write(frame_proc);
+
+        // Wait for 30ms and break if 'q' is pressed
+        if (cv::waitKey(30) == 'q')
+            break;
+    }
+
+    // Release resources
+    cap.release();
+    writer.release();
     cv::destroyAllWindows();
     return 0;
 }
