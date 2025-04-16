@@ -3,33 +3,38 @@
 #include <iostream>
 
 int main() {
-    cv::Mat img = cv::imread("example.jpg");
-    if (img.empty()) {
-        std::cerr << "Failed to read image\n";
+
+    std::string videoPath = "./data/actions2.mpg";
+
+    // Open the video file
+    cv::VideoCapture cap(videoPath);
+    if (!cap.isOpened()) {
+        std::cerr << "Error: Cannot open the video file." << std::endl;
         return -1;
     }
-    // std::cout << img << std::endl;
-    cv::imshow("Original image", img);
-    cv::waitKey(0);
-    cv::destroyAllWindows();
 
-    cv::Mat img_transformed;
+    // Window to show the video
+    cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
 
-    // increase brightness
-    img.convertTo(img_transformed, -1, 1, 170);
+    cv::Mat frame;
+    while (true) {
+        // Read next frame
+        cap >> frame;
 
-    // cut out part of image
-    img_transformed = img_transformed(cv::Range(150, 300), cv::Range::all());
+        // Check if frame is empty (end of video)
+        if (frame.empty())
+            break;
 
-    // blur
-    blur(img_transformed, img_transformed, cv::Size(9, 9), cv::Point(-1,-1));
+        // Display the frame
+        cv::imshow("Video", frame);
 
-    // show final transformed image
-    cv::imshow("Transformed image", img_transformed);
+        // Wait for 30ms and break if 'q' is pressed
+        if (cv::waitKey(30) == 'q')
+            break;
+    }
 
-    // std::cout << img_transformed << std::endl;
-
-    cv::waitKey(0);
+    // Release resources
+    cap.release();
     cv::destroyAllWindows();
     return 0;
 }
