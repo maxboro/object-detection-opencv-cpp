@@ -22,10 +22,10 @@ make clean     # Cleans up build files
 ```
 
 # Example
-Video with detections:
+Video with detections:  
 ![Demo](./docs/output_gif.gif)
 
-Processed video (based on such frames we calculate objects' bounds):
+Processed video (based on such frames we calculate objects' bounds):  
 ![Demo](./docs/output_proc_gif.gif)
 
 Screenshot of runtime windows:
