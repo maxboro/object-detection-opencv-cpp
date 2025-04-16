@@ -35,6 +35,9 @@ void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_
     cv::threshold(frame_proc, frame_proc, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     cv::bitwise_not(frame_proc, frame_proc);
 
+    // Morphological filtering
+    cv::morphologyEx(frame_proc, frame_proc, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1,-1), 2);
+
     // Find contours
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(frame_proc, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
