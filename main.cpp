@@ -35,7 +35,8 @@ int main() {
         process_frame(frame, &frame_proc);
 
         // Display the frame
-        cv::imshow("Video", frame_proc);
+        cv::imshow("Video", frame);
+        cv::imshow("Video processed", frame_proc);
 
         // Wait for 30ms and break if 'q' is pressed
         if (cv::waitKey(30) == 'q')
