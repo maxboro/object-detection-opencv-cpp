@@ -20,7 +20,7 @@ make clean     # Cleans up build files
 ```
 
 # Example
-![screenshot](./docs/screenshot.png)
+![screenshot](./docs/screenshot_video.png)
 
 # Credits
 Video is from [UCF Aerial Action Data Set](https://www.crcv.ucf.edu/data/UCF_Aerial_Action.php)

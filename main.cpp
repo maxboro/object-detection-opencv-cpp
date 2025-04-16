@@ -2,8 +2,15 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
-int main() {
+void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr){
+    cv::Mat frame_proc;
+    // blur
+    blur(frame, frame_proc, cv::Size(9, 9), cv::Point(-1,-1));
 
+    *frame_proc_ptr = frame_proc;
+}
+
+int main() {
     std::string videoPath = "./data/actions2.mpg";
 
     // Open the video file
@@ -16,7 +23,7 @@ int main() {
     // Window to show the video
     cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
 
-    cv::Mat frame;
+    cv::Mat frame, frame_proc;
     while (true) {
         // Read next frame
         cap >> frame;
@@ -25,8 +32,10 @@ int main() {
         if (frame.empty())
             break;
 
+        process_frame(frame, &frame_proc);
+
         // Display the frame
-        cv::imshow("Video", frame);
+        cv::imshow("Video", frame_proc);
 
         // Wait for 30ms and break if 'q' is pressed
         if (cv::waitKey(30) == 'q')
