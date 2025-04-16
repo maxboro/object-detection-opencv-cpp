@@ -32,7 +32,7 @@ void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_
     blur(frame_proc, frame_proc, cv::Size(12, 12), cv::Point(-1,-1));
 
     // Threshold to ensure binary image
-    cv::threshold(frame_proc, frame_proc, 110, 255, cv::THRESH_BINARY);
+    cv::threshold(frame_proc, frame_proc, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     cv::bitwise_not(frame_proc, frame_proc);
 
     // Find contours
