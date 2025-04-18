@@ -111,6 +111,17 @@ bool initialize_writers(struct SavedVideoParams* video_params_ptr, cv::VideoWrit
     return true;
 }
 
+void write_to_file_main(cv::Mat frame_final, struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_ptr){
+    cv::resize(frame_final, frame_final, cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height));
+    writer_ptr->write(frame_final);
+}
+
+void write_to_file_proc(cv::Mat frame_proc, struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_proc_ptr){
+    cv::resize(frame_proc, frame_proc, cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height));
+    cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
+    writer_proc_ptr->write(frame_proc);
+}
+
 int main() {
     std::string videoPath = "./data/actions2.mpg";
 
@@ -149,12 +160,8 @@ int main() {
         cv::imshow("Video with detection", frame_final);
         cv::imshow("Video processed", frame_proc);
 
-        cv::resize(frame_final, frame_final, cv::Size(video_params.frame_width, video_params.frame_height));
-        writer.write(frame_final);
-
-        cv::resize(frame_proc, frame_proc, cv::Size(video_params.frame_width, video_params.frame_height));
-        cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
-        writer_proc.write(frame_proc);
+        write_to_file_main(frame_final, &video_params, &writer);
+        write_to_file_proc(frame_proc, &video_params, &writer_proc);
 
         // Wait for 30ms and break if 'q' is pressed
         if (cv::waitKey(30) == 'q')
@@ -164,6 +171,7 @@ int main() {
     // Release resources
     cap.release();
     writer.release();
+    writer_proc.release();
     cv::destroyAllWindows();
     return 0;
 }
