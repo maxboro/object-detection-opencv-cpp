@@ -75,6 +75,42 @@ struct SavedVideoParams get_params(cv::VideoCapture* cap_ptr){
     return params;
 }
 
+bool initialize_writers(struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_ptr, cv::VideoWriter* writer_proc_ptr){
+
+    // writer for original video with marks
+    cv::VideoWriter writer(
+        "./output/output.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        video_params_ptr->fps, 
+        cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height)
+    );
+
+    if (!writer.isOpened()) {
+        std::cerr << "Error: Cannot open the video writer.\n" << std::endl;
+        return false;
+    }
+
+
+    // writer for processed video
+    cv::VideoWriter writer_proc(
+        "./output/output_proc.mp4", 
+        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
+        video_params_ptr->fps, 
+        cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height)
+    );
+
+
+    if (!writer_proc.isOpened()) {
+        std::cerr << "Error: Cannot open the video writer.\n" << std::endl;
+        return false;
+    }
+
+    *writer_ptr = writer;
+    *writer_proc_ptr = writer_proc;
+    // if success return true
+    return true;
+}
+
 int main() {
     std::string videoPath = "./data/actions2.mpg";
 
@@ -87,24 +123,13 @@ int main() {
 
     // for saving video
     struct SavedVideoParams video_params = get_params(&cap);
-    cv::VideoWriter writer(
-        "./output/output.mp4", 
-        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        video_params.fps, 
-        cv::Size(video_params.frame_width, video_params.frame_height)
-    );
-    cv::VideoWriter writer_proc(
-        "./output/output_proc.mp4", 
-        cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        video_params.fps, 
-        cv::Size(video_params.frame_width, video_params.frame_height)
-    );
-
-    if (!writer.isOpened()) {
-        std::cerr << "Error: Cannot open the video writer.\n" << std::endl;
+    cv::VideoWriter writer, writer_proc;
+    bool writer_init_is_successful = initialize_writers(&video_params, &writer, &writer_proc);
+    if (!writer_init_is_successful){
+        std::cerr << "Error: Writers init wasn't successful." << std::endl;
         return -1;
     }
-
+    
     // Window to show the video
     cv::namedWindow("Video with detection", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Video processed", cv::WINDOW_AUTOSIZE);
