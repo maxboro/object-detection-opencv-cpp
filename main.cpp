@@ -6,6 +6,12 @@
 #define MIN_AREA_PIX 100
 #define MAX_AREA_PIX 3000
 
+struct SavedVideoParams {
+    int frame_width;
+    int frame_height;
+    double fps;
+};
+
 bool person_alike(cv::Rect bbox){
     bool shaped_as_person = bbox.height > bbox.width;
     float area = bbox.height * bbox.width;
@@ -61,6 +67,14 @@ void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_
     *frame_final_ptr = frame_final;
 }
 
+struct SavedVideoParams get_params(cv::VideoCapture* cap_ptr){ 
+    struct SavedVideoParams params;
+    params.frame_width = static_cast<int>(cap_ptr->get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
+    params.frame_height = static_cast<int>(cap_ptr->get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
+    params.fps = cap_ptr->get(cv::CAP_PROP_FPS);
+    return params;
+}
+
 int main() {
     std::string videoPath = "./data/actions2.mpg";
 
@@ -72,20 +86,18 @@ int main() {
     }
 
     // for saving video
-    int frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
-    int frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
-    double fps = cap.get(cv::CAP_PROP_FPS);
+    struct SavedVideoParams video_params = get_params(&cap);
     cv::VideoWriter writer(
         "./output/output.mp4", 
         cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        fps, 
-        cv::Size(frame_width, frame_height)
+        video_params.fps, 
+        cv::Size(video_params.frame_width, video_params.frame_height)
     );
     cv::VideoWriter writer_proc(
         "./output/output_proc.mp4", 
         cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        fps, 
-        cv::Size(frame_width, frame_height)
+        video_params.fps, 
+        cv::Size(video_params.frame_width, video_params.frame_height)
     );
 
     if (!writer.isOpened()) {
@@ -112,10 +124,10 @@ int main() {
         cv::imshow("Video with detection", frame_final);
         cv::imshow("Video processed", frame_proc);
 
-        cv::resize(frame_final, frame_final, cv::Size(frame_width, frame_height));
+        cv::resize(frame_final, frame_final, cv::Size(video_params.frame_width, video_params.frame_height));
         writer.write(frame_final);
 
-        cv::resize(frame_proc, frame_proc, cv::Size(frame_width, frame_height));
+        cv::resize(frame_proc, frame_proc, cv::Size(video_params.frame_width, video_params.frame_height));
         cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
         writer_proc.write(frame_proc);
 
