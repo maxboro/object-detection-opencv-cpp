@@ -2,9 +2,9 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
-#define VIDEO_SAVE_RESIZE_COEF 0.5
-#define MIN_AREA_PIX 100
-#define MAX_AREA_PIX 3000
+constexpr double VIDEO_SAVE_RESIZE_COEF = 0.5;
+constexpr int MIN_AREA_PIX = 100;
+constexpr int MAX_AREA_PIX = 3000;
 
 struct SavedVideoParams {
     int frame_width;
