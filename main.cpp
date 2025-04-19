@@ -5,6 +5,7 @@
 constexpr double VIDEO_SAVE_RESIZE_COEF = 0.5;
 constexpr int MIN_AREA_PIX = 100;
 constexpr int MAX_AREA_PIX = 3000;
+constexpr const char* input_video_path = "./data/actions2.mpg";
 
 struct SavedVideoParams {
     int frame_width;
@@ -108,10 +109,8 @@ void write_to_file(const cv::Mat& frame, const struct SavedVideoParams& video_pa
 }
 
 int main() {
-    std::string videoPath = "./data/actions2.mpg";
-
     // Open the video file
-    cv::VideoCapture cap(videoPath);
+    cv::VideoCapture cap(input_video_path);
     if (!cap.isOpened()) {
         std::cerr << "Error: Cannot open the video file." << std::endl;
         return -1;
