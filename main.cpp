@@ -56,11 +56,11 @@ void process_frame(cv::Mat& frame, cv::Mat& frame_proc){
     }
 }
 
-struct SavedVideoParams get_params(cv::VideoCapture* cap_ptr){ 
+struct SavedVideoParams get_params(cv::VideoCapture& cap){ 
     struct SavedVideoParams params;
-    params.frame_width = static_cast<int>(cap_ptr->get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
-    params.frame_height = static_cast<int>(cap_ptr->get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
-    params.fps = cap_ptr->get(cv::CAP_PROP_FPS);
+    params.frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
+    params.frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
+    params.fps = cap.get(cv::CAP_PROP_FPS);
     return params;
 }
 
@@ -118,7 +118,7 @@ int main() {
     }
 
     // for saving video
-    struct SavedVideoParams video_params = get_params(&cap);
+    struct SavedVideoParams video_params = get_params(cap);
     cv::VideoWriter writer, writer_proc;
     bool writer_init_is_successful = initialize_writers(video_params, writer, writer_proc);
     if (!writer_init_is_successful){
