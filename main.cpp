@@ -102,15 +102,12 @@ bool initialize_writers(const struct SavedVideoParams& video_params, cv::VideoWr
     return true;
 }
 
-void write_to_file_main(cv::Mat frame_final, struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_ptr){
-    cv::resize(frame_final, frame_final, cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height));
-    writer_ptr->write(frame_final);
-}
-
-void write_to_file_proc(cv::Mat frame_proc, struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_proc_ptr){
-    cv::resize(frame_proc, frame_proc, cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height));
-    cv::cvtColor(frame_proc, frame_proc, cv::COLOR_GRAY2BGR);
-    writer_proc_ptr->write(frame_proc);
+void write_to_file(cv::Mat frame, struct SavedVideoParams& video_params, cv::VideoWriter& writer, bool is_grey){
+    cv::resize(frame, frame, cv::Size(video_params.frame_width, video_params.frame_height));
+    if (is_grey){
+        cv::cvtColor(frame, frame, cv::COLOR_GRAY2BGR);
+    }
+    writer.write(frame);
 }
 
 int main() {
@@ -151,8 +148,8 @@ int main() {
         cv::imshow("Video with detection", frame);
         cv::imshow("Video processed", frame_proc);
 
-        write_to_file_main(frame, &video_params, &writer);
-        write_to_file_proc(frame_proc, &video_params, &writer_proc);
+        write_to_file(frame, video_params, writer, false);
+        write_to_file(frame_proc, video_params, writer_proc, true);
 
         // Wait for 30ms and break if 'q' is pressed
         if (cv::waitKey(30) == 'q')
