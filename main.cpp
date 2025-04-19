@@ -30,11 +30,7 @@ cv::Point center_of_bbox(cv::Rect bbox){
     return cv::Point(x, y);
 }
 
-void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_ptr){
-    cv::Mat frame_proc, frame_final;
-
-    frame_final = frame.clone();
-
+void process_frame(const cv::Mat& frame, cv::Mat& frame_proc){
     // to back and white
     cv::cvtColor(frame, frame_proc, cv::COLOR_BGR2GRAY);
 
@@ -59,12 +55,9 @@ void process_frame(cv::Mat frame, cv::Mat* frame_proc_ptr, cv::Mat* frame_final_
         if (person_alike(bbox)){
             // draw ROI
             cv::rectangle(frame_proc, bbox, cv::Scalar(125, 125, 125), 4); 
-            cv::circle(frame_final,	center_of_bbox(bbox), 1, cv::Scalar(0, 0, 255), 5);
+            cv::circle(frame, center_of_bbox(bbox), 1, cv::Scalar(0, 0, 255), 5);
         }
     }
-
-    *frame_proc_ptr = frame_proc;
-    *frame_final_ptr = frame_final;
 }
 
 struct SavedVideoParams get_params(cv::VideoCapture* cap_ptr){ 
@@ -145,7 +138,7 @@ int main() {
     cv::namedWindow("Video with detection", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Video processed", cv::WINDOW_AUTOSIZE);
 
-    cv::Mat frame, frame_proc, frame_final;
+    cv::Mat frame, frame_proc;
     while (true) {
         // Read next frame
         cap >> frame;
@@ -154,13 +147,13 @@ int main() {
         if (frame.empty())
             break;
 
-        process_frame(frame, &frame_proc, &frame_final);
+        process_frame(frame, frame_proc);
 
         // Display the frame
-        cv::imshow("Video with detection", frame_final);
+        cv::imshow("Video with detection", frame);
         cv::imshow("Video processed", frame_proc);
 
-        write_to_file_main(frame_final, &video_params, &writer);
+        write_to_file_main(frame, &video_params, &writer);
         write_to_file_proc(frame_proc, &video_params, &writer_proc);
 
         // Wait for 30ms and break if 'q' is pressed
