@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
+#include <filesystem>
 
 constexpr double VIDEO_SAVE_RESIZE_COEF = 0.5;
 constexpr int MIN_AREA_PIX = 100;
@@ -109,6 +110,8 @@ void write_to_file(const cv::Mat& frame, const struct SavedVideoParams& video_pa
 }
 
 int main() {
+    std::filesystem::create_directory("./output");
+
     // Open the video file
     cv::VideoCapture cap(input_video_path);
     if (!cap.isOpened()) {
