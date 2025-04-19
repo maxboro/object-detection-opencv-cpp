@@ -98,12 +98,13 @@ bool initialize_writers(const struct SavedVideoParams& video_params, cv::VideoWr
     return true;
 }
 
-void write_to_file(cv::Mat frame, struct SavedVideoParams& video_params, cv::VideoWriter& writer, bool is_grey){
-    cv::resize(frame, frame, cv::Size(video_params.frame_width, video_params.frame_height));
+void write_to_file(const cv::Mat& frame, struct SavedVideoParams& video_params, cv::VideoWriter& writer, bool is_grey){
+    cv::Mat frame_tmp;
+    cv::resize(frame, frame_tmp, cv::Size(video_params.frame_width, video_params.frame_height));
     if (is_grey){
-        cv::cvtColor(frame, frame, cv::COLOR_GRAY2BGR);
+        cv::cvtColor(frame_tmp, frame_tmp, cv::COLOR_GRAY2BGR);
     }
-    writer.write(frame);
+    writer.write(frame_tmp);
 }
 
 int main() {
