@@ -12,7 +12,7 @@ struct SavedVideoParams {
     double fps;
 };
 
-bool person_alike(cv::Rect bbox){
+bool person_alike(const cv::Rect& bbox){
     bool shaped_as_person = bbox.height > bbox.width;
     float area = bbox.height * bbox.width;
     bool is_small = area > MIN_AREA_PIX && area < MAX_AREA_PIX;
@@ -23,7 +23,7 @@ bool person_alike(cv::Rect bbox){
     }
 }
 
-cv::Point center_of_bbox(cv::Rect bbox){
+cv::Point center_of_bbox(const cv::Rect& bbox){
     int x, y;
     x = bbox.x + (bbox.width / 2);
     y = bbox.y + (bbox.height / 2);
