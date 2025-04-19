@@ -56,7 +56,7 @@ void process_frame(cv::Mat& frame, cv::Mat& frame_proc){
     }
 }
 
-struct SavedVideoParams get_params(cv::VideoCapture& cap){ 
+struct SavedVideoParams get_params(const cv::VideoCapture& cap){ 
     struct SavedVideoParams params;
     params.frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) * VIDEO_SAVE_RESIZE_COEF);
     params.frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT) * VIDEO_SAVE_RESIZE_COEF);
@@ -98,7 +98,7 @@ bool initialize_writers(const struct SavedVideoParams& video_params, cv::VideoWr
     return true;
 }
 
-void write_to_file(const cv::Mat& frame, struct SavedVideoParams& video_params, cv::VideoWriter& writer, bool is_grey){
+void write_to_file(const cv::Mat& frame, const struct SavedVideoParams& video_params, cv::VideoWriter& writer, bool is_grey){
     cv::Mat frame_tmp;
     cv::resize(frame, frame_tmp, cv::Size(video_params.frame_width, video_params.frame_height));
     if (is_grey){
