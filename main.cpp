@@ -30,7 +30,7 @@ cv::Point center_of_bbox(cv::Rect bbox){
     return cv::Point(x, y);
 }
 
-void process_frame(const cv::Mat& frame, cv::Mat& frame_proc){
+void process_frame(cv::Mat& frame, cv::Mat& frame_proc){
     // to back and white
     cv::cvtColor(frame, frame_proc, cv::COLOR_BGR2GRAY);
 
