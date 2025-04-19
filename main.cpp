@@ -68,14 +68,14 @@ struct SavedVideoParams get_params(cv::VideoCapture* cap_ptr){
     return params;
 }
 
-bool initialize_writers(struct SavedVideoParams* video_params_ptr, cv::VideoWriter* writer_ptr, cv::VideoWriter* writer_proc_ptr){
+bool initialize_writers(const struct SavedVideoParams& video_params, cv::VideoWriter& writer, cv::VideoWriter& writer_proc){
 
     // writer for original video with marks
-    cv::VideoWriter writer(
+    writer.open(
         "./output/output.mp4", 
         cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        video_params_ptr->fps, 
-        cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height)
+        video_params.fps, 
+        cv::Size(video_params.frame_width, video_params.frame_height)
     );
 
     if (!writer.isOpened()) {
@@ -85,11 +85,11 @@ bool initialize_writers(struct SavedVideoParams* video_params_ptr, cv::VideoWrit
 
 
     // writer for processed video
-    cv::VideoWriter writer_proc(
+    writer_proc.open(
         "./output/output_proc.mp4", 
         cv::VideoWriter::fourcc('m', 'p', '4', 'v'), // MP4 codec
-        video_params_ptr->fps, 
-        cv::Size(video_params_ptr->frame_width, video_params_ptr->frame_height)
+        video_params.fps, 
+        cv::Size(video_params.frame_width, video_params.frame_height)
     );
 
 
@@ -98,8 +98,6 @@ bool initialize_writers(struct SavedVideoParams* video_params_ptr, cv::VideoWrit
         return false;
     }
 
-    *writer_ptr = writer;
-    *writer_proc_ptr = writer_proc;
     // if success return true
     return true;
 }
@@ -128,7 +126,7 @@ int main() {
     // for saving video
     struct SavedVideoParams video_params = get_params(&cap);
     cv::VideoWriter writer, writer_proc;
-    bool writer_init_is_successful = initialize_writers(&video_params, &writer, &writer_proc);
+    bool writer_init_is_successful = initialize_writers(video_params, writer, writer_proc);
     if (!writer_init_is_successful){
         std::cerr << "Error: Writers init wasn't successful." << std::endl;
         return -1;
