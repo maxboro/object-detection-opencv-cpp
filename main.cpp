@@ -13,14 +13,10 @@ struct SavedVideoParams {
 };
 
 bool person_alike(const cv::Rect& bbox){
-    bool shaped_as_person = bbox.height > bbox.width;
-    float area = bbox.height * bbox.width;
-    bool is_small = area > MIN_AREA_PIX && area < MAX_AREA_PIX;
-    if (shaped_as_person && is_small){
-        return true;
-    } else {
-        return false;
-    }
+    const bool shaped_as_person = bbox.height > bbox.width;
+    const int area = static_cast<int>(bbox.area());
+    const bool is_small = area > MIN_AREA_PIX && area < MAX_AREA_PIX;
+    return shaped_as_person && is_small;
 }
 
 cv::Point center_of_bbox(const cv::Rect& bbox){
